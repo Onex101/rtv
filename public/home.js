@@ -37,12 +37,18 @@ function main (){
             let v = y / parseFloat(ny);
         
             let ray = new Ray(origin, lower_left_corner.add(horizontal.mul(u)).add(vertical.mul(v)));
-            colour(ray, world, (col) => {
+            let col = get_colour(ray, world, (col) => {
                 col.x =((col.x * 255.99));
                 col.y = ((col.y * 255.99));
                 col.z = ((col.z * 255.99));
+                col.mul(0.5);
                 setPixel(imageData.data, nx, x, ny - y, col.x, col.y, col.z);
             });
+            col.x =((col.x * 255.99));
+            col.y = ((col.y * 255.99));
+            col.z = ((col.z * 255.99));
+            
+            setPixel(imageData.data, nx, x, ny - y, col.x, col.y, col.z);
         }
     }
     context.putImageData(imageData, 0, 0);
@@ -56,8 +62,8 @@ function setPixel(data, width, x, y, r, g, b) {
     data[p + 3] = 255;
 }
 
-function colour(ray, world, callback){
-    world.hit(ray, 0.0, Number.MAX_VALUE, (is_hit, record) => {
+function get_colour(ray, world, callback){
+    let rec = world.hit(ray, 0.001, Number.MAX_VALUE, (is_hit, record) => {
         if (is_hit){
             callback( new Vector(
                 record.n.x + 1, 
@@ -71,5 +77,17 @@ function colour(ray, world, callback){
             callback ((new Vector(1.0, 1.0, 1.0)).mul(1.0 - t).add((new Vector(0.5, 0.7, 1.0)).mul(t)));
         }
     });
+    if (rec.hit){
+        return new Vector(
+            rec.n.x + 1, 
+            rec.n.y + 1, 
+            rec.n.z +1).mul(0.5)
+    }
+    else{
+        let unit_direction = ray.direction().unit_vector();
+        let t = 0.5 * (unit_direction.y + 1.0);
+        return ((new Vector(1.0, 1.0, 1.0)).mul(1.0 - t).add((new Vector(0.5, 0.7, 1.0)).mul(t)));
+    }
+    
     
 }
