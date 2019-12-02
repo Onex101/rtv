@@ -29,9 +29,7 @@ function main (){
     let nn = 2;
     for (let y = ny - 1; y >= 0; y--) {
         for (let x = 0; x < nx; x++) {
-            
-            let u = x / parseFloat(nx);
-            let v = y / parseFloat(ny);
+
             let col = new Vector();
 
             for (let s = 0; s < ns; s++) {
@@ -39,9 +37,9 @@ function main (){
                 let v = (y + Math.random()) / ny;
                 let r = cam.get_ray(u, v);
                 let p = r.point_at_parameter(2.0);
-                col = col.add(get_colour(r, world,));
+                col = col.add(get_colour(r, world));
             }
-            col = col.div(ns).sqrt().mul(255.99);
+            col = col.div(ns).mul(255.99);
             setPixel(imageData.data, nx, x, ny - y, col.x, col.y, col.z);
         }
     }
@@ -60,21 +58,19 @@ function get_colour(ray, world){
     let rec = world.hit(ray, 0.001, Number.MAX_VALUE);
     if (rec.hit){
         let target = rec.p.add(rec.n).add(random_in_unit_sphere());
-        return get_colour(new Ray(rec.p, target.sub(rec.p)), world).mul(0.5);
+        return get_colour(new Ray(rec.p, target.sub(rec.p)), world).mul(0.8);
     }
     else{
         let unit_direction = ray.direction().unit_vector();
         let t = 0.5 * (unit_direction.y + 1.0);
         return ((new Vector(1.0, 1.0, 1.0)).mul(1.0 - t).add((new Vector(0.5, 0.7, 1.0)).mul(t)));
     }
-    
-    
 }
 
 function random_in_unit_sphere() {
     let p;
     do {
-        p = (new Vector(Math.random(), Math.random(), Math.random()).mul(2.0)).sub(1.0)
+        p = (new Vector(Math.random(), Math.random(), Math.random()).mul(2.0)).sub(1.0);
     }
     while (p.squared_length() >= 1.0);
     return p;
