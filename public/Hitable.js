@@ -7,27 +7,16 @@ class Hitable_List {
 		this.size = size;
 	}
 
-	hit(ray, tmin, tmax, callback){
+	hit(ray, tmin, tmax){
 		let closest = tmax;
 		let rec = {t: 0.0, p: new Vector(0.0, 0.0, 0.0), n: new Vector(0.0, 0.0, 0.0), hit: false};
 		for (var i = 0; i < this.size; i++){
 			if (this.list[i] instanceof Sphere){
-				let tmp_hit = this.list[i].is_hit(ray, tmin, closest, (record) => {
-					if (record.hit){
-						
-						callback(true, record)
-					}
-					else{
-						callback(false, record)
-					}
-				});
+				let tmp_hit = this.list[i].is_hit(ray, tmin, closest);
 				if (tmp_hit.hit){
 					closest = tmp_hit.t;
 					rec = tmp_hit;
 				}
-					
-					//console.log({rec, i})
-				// closest = rec.t;
 			}
 		}
 		return (rec)
