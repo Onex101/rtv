@@ -65,6 +65,10 @@ class Vector {
         let k = 1.0 / this.length();
         return new Vector(this.x * k, this.y *= k, this.z *= k);
     }
+
+    sqrt(){
+        return new Vector(Math.sqrt(this.x), Math.sqrt(this.y), Math.sqrt(this.z))
+    }
 }
 
 export default Vector
