@@ -11,16 +11,14 @@ class Hitable_List {
 		let closest = tmax;
 		let rec = {t: 0.0, p: new Vector(0.0, 0.0, 0.0), n: new Vector(0.0, 0.0, 0.0), hit: false};
 		for (var i = 0; i < this.size; i++){
-			if (this.list[i] instanceof Sphere){
-				let tmp_hit = this.list[i].is_hit(ray, tmin, closest);
-				if (tmp_hit.hit){
-					closest = tmp_hit.t;
-					rec = tmp_hit;
-				}
+			let tmp_hit = this.list[i].is_hit(ray, tmin, closest);
+			if (tmp_hit.hit){
+				closest = tmp_hit.t;
+				rec = tmp_hit;
 			}
+			
 		}
 		return (rec)
-		// return {hit_anything: hit_anything, hit_record: hit_record}
 	}
 }
 
