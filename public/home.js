@@ -37,14 +37,12 @@ function main (){
             let v = y / parseFloat(ny);
         
             let ray = new Ray(origin, lower_left_corner.add(horizontal.mul(u)).add(vertical.mul(v)));
-            let col = colour(ray, world);
-            // if (x == 1 && y == 1)
-            col.x =((col.x * 255.99));
-            col.y = ((col.y * 255.99));
-            col.z = ((col.z * 255.99));
-            // console.log(col)
-
-            setPixel(imageData.data, nx, x, ny - y, col.x, col.y, col.z);
+            colour(ray, world, (col) => {
+                col.x =((col.x * 255.99));
+                col.y = ((col.y * 255.99));
+                col.z = ((col.z * 255.99));
+                setPixel(imageData.data, nx, x, ny - y, col.x, col.y, col.z);
+            });
         }
     }
     context.putImageData(imageData, 0, 0);
@@ -58,16 +56,20 @@ function setPixel(data, width, x, y, r, g, b) {
     data[p + 3] = 255;
 }
 
-function colour(ray, world){
-    let record = {t: 0.0 , p: new Vector() , n: 0.0};
-    let tmp = world.hit(ray, 0.0, Number.MAX_VALUE, record);
-    if (tmp.hit_anything){
-        // console.log(tmp)
-        return new Vector(tmp.hit_record.n.x + 1, 
-                          tmp.hit_record.n.y + 1, 
-                          tmp.hit_record.n.z +1).mul(0.5);
-    }
-    let unit_direction = ray.direction().unit_vector();
-    let t = 0.5 * (unit_direction.y + 1.0);
-    return (new Vector(1.0, 1.0, 1.0)).mul(1.0 - t).add((new Vector(0.5, 0.7, 1.0)).mul(t));
+function colour(ray, world, callback){
+    world.hit(ray, 0.0, Number.MAX_VALUE, (is_hit, record) => {
+        if (is_hit){
+            callback( new Vector(
+                record.n.x + 1, 
+                record.n.y + 1, 
+                record.n.z +1).mul(0.5))
+            
+        }
+        else{
+            let unit_direction = ray.direction().unit_vector();
+            let t = 0.5 * (unit_direction.y + 1.0);
+            callback ((new Vector(1.0, 1.0, 1.0)).mul(1.0 - t).add((new Vector(0.5, 0.7, 1.0)).mul(t)));
+        }
+    });
+    
 }
