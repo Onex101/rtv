@@ -6,7 +6,7 @@ class Sphere{
 		this.radius = radius || 1;
 	}
 
-	is_hit(ray, tmin, tmax, callback){
+	is_hit(ray, tmin, tmax){
 		let oc = ray.origin().sub(this.center);
 		let a = ray.direction().dot(ray.direction());
 		let b = oc.dot(ray.direction());
