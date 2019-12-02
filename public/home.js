@@ -1,7 +1,8 @@
 import Vector from "./Vector.js"
-import Ray from "./Ray.js";
 import Sphere from "./Sphere.js";
 import Hitable_List from "./Hitable.js";
+import Camera from "./Camera.js";
+import Ray from "./Ray.js";
 
 let canvas;
 let context;
@@ -16,38 +17,31 @@ window.onload = function() {
 function main (){
     const nx = canvas.width;
     const ny = canvas.height;
+    const ns = ny;
     let imageData = context.getImageData(0, 0, nx, ny);
-
-    let lower_left_corner   = new Vector(-2.0, -1.0, -1.0);
-    let horizontal          = new Vector(4.0, 0.0, 0.0);
-    let vertical            = new Vector(0.0, 2.0, 0.0);
-    let origin              = new Vector(0.0, 0.0, 0.0);
 
     let list = [];
     list[0] = new Sphere(new Vector(0, 0, -1), 0.5);
     list[1] = new Sphere(new Vector(0, -100.5, -1), 100);
 
     let world = new Hitable_List(list, list.length);
-
+    let cam = new Camera();
     let nn = 2;
     for (let y = ny - 1; y >= 0; y--) {
         for (let x = 0; x < nx; x++) {
-
+            
             let u = x / parseFloat(nx);
             let v = y / parseFloat(ny);
-        
-            let ray = new Ray(origin, lower_left_corner.add(horizontal.mul(u)).add(vertical.mul(v)));
-            let col = get_colour(ray, world, (col) => {
-                col.x =((col.x * 255.99));
-                col.y = ((col.y * 255.99));
-                col.z = ((col.z * 255.99));
-                col.mul(0.5);
-                setPixel(imageData.data, nx, x, ny - y, col.x, col.y, col.z);
-            });
-            col.x =((col.x * 255.99));
-            col.y = ((col.y * 255.99));
-            col.z = ((col.z * 255.99));
-            
+            let col = new Vector();
+
+            for (let s = 0; s < ns; s++) {
+                let u = (x + Math.random()) / nx;
+                let v = (y + Math.random()) / ny;
+                let r = cam.get_ray(u, v);
+                let p = r.point_at_parameter(2.0);
+                col = col.add(get_colour(r, world,));
+            }
+            col = col.div(ns).sqrt().mul(255.99);
             setPixel(imageData.data, nx, x, ny - y, col.x, col.y, col.z);
         }
     }
@@ -62,26 +56,11 @@ function setPixel(data, width, x, y, r, g, b) {
     data[p + 3] = 255;
 }
 
-function get_colour(ray, world, callback){
-    let rec = world.hit(ray, 0.001, Number.MAX_VALUE, (is_hit, record) => {
-        if (is_hit){
-            callback( new Vector(
-                record.n.x + 1, 
-                record.n.y + 1, 
-                record.n.z +1).mul(0.5))
-            
-        }
-        else{
-            let unit_direction = ray.direction().unit_vector();
-            let t = 0.5 * (unit_direction.y + 1.0);
-            callback ((new Vector(1.0, 1.0, 1.0)).mul(1.0 - t).add((new Vector(0.5, 0.7, 1.0)).mul(t)));
-        }
-    });
+function get_colour(ray, world){
+    let rec = world.hit(ray, 0.001, Number.MAX_VALUE);
     if (rec.hit){
-        return new Vector(
-            rec.n.x + 1, 
-            rec.n.y + 1, 
-            rec.n.z +1).mul(0.5)
+        let target = rec.p.add(rec.n).add(random_in_unit_sphere());
+        return get_colour(new Ray(rec.p, target.sub(rec.p)), world).mul(0.5);
     }
     else{
         let unit_direction = ray.direction().unit_vector();
@@ -90,4 +69,13 @@ function get_colour(ray, world, callback){
     }
     
     
+}
+
+function random_in_unit_sphere() {
+    let p;
+    do {
+        p = (new Vector(Math.random(), Math.random(), Math.random()).mul(2.0)).sub(1.0)
+    }
+    while (p.squared_length() >= 1.0);
+    return p;
 }
