@@ -10,7 +10,7 @@ class Vector {
     }
 
     squared_length(){
-        return Math.pow(this.x , 2) + Math.pow(this.y , 2) + Math.pow(this.z , 2);
+        return Math.pow(this.x * 1.0, 2) + Math.pow(this.y * 1.0, 2) + Math.pow(this.z * 1.0, 2);
     }
 
     add(v){
