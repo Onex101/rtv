@@ -26,20 +26,19 @@ function main (){
 
     let world = new Hitable_List(list, list.length);
     let cam = new Camera();
-    let nn = 2;
+
     for (let y = ny - 1; y >= 0; y--) {
         for (let x = 0; x < nx; x++) {
 
             let col = new Vector();
 
             for (let s = 0; s < ns; s++) {
-                let u = (x + Math.random()) / nx;
-                let v = (y + Math.random()) / ny;
+                let u = (x + get_rand_float(-1, 1)) / nx;
+                let v = (y + get_rand_float(-1, 1)) / ny;
                 let r = cam.get_ray(u, v);
-                let p = r.point_at_parameter(2.0);
                 col = col.add(get_colour(r, world));
             }
-            col = col.div(ns).mul(255.99);
+            col = col.div(ns).mul(255).floor();
             setPixel(imageData.data, nx, x, ny - y, col.x, col.y, col.z);
         }
     }
@@ -58,7 +57,7 @@ function get_colour(ray, world){
     let rec = world.hit(ray, 0.001, Number.MAX_VALUE);
     if (rec.hit){
         let target = rec.p.add(rec.n).add(random_in_unit_sphere());
-        return get_colour(new Ray(rec.p, target.sub(rec.p)), world).mul(0.8);
+        return get_colour(new Ray(rec.p, target.sub(rec.p)), world).mul(0.5);
     }
     else{
         let unit_direction = ray.direction().unit_vector();
@@ -74,4 +73,8 @@ function random_in_unit_sphere() {
     }
     while (p.squared_length() >= 1.0);
     return p;
+}
+
+function get_rand_float(min, max) {
+    return (Math.random() * (max - min)) + min;
 }
