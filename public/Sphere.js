@@ -10,7 +10,7 @@ class Sphere{
 		let oc = ray.origin().sub(this.center);
 		let a = ray.direction().dot(ray.direction());
 		let b = oc.dot(ray.direction());
-		let c = oc.dot(oc) - Math.pow(this.radius, 2);
+		let c = oc.dot(oc) - this.radius * this.radius;
 		let discriminant = b*b - a*c;
 		let record = {t: 0.0, p: new Vector(0.0, 0.0, 0.0), n: new Vector(0.0, 0.0, 0.0), hit: false};
 		if (discriminant > 0){
