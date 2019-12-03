@@ -69,6 +69,10 @@ class Vector {
     sqrt(){
         return new Vector(Math.sqrt(this.x), Math.sqrt(this.y), Math.sqrt(this.z))
     }
+
+    floor(){
+        return new Vector(Math.floor(this.x), Math.floor(this.y), Math.floor(this.z));
+    }
 }
 
 export default Vector
