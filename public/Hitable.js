@@ -1,5 +1,17 @@
 import Sphere from './Sphere.js'
 import Vector from './Vector.js';
+import Material from './Material.js';
+
+
+class Hit_Record {
+	constructor(t, p, n, hit, m){
+		this.t = t || 0.0;
+		this.p = p || new Vector(0.0, 0.0, 0.0); 
+		this.n = n || new Vector(0.0, 0.0, 0.0); 
+		this.hit = hit || false;
+		this.m = m;
+	}
+}
 
 class Hitable_List {
 	constructor(list, size){
