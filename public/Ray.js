@@ -23,6 +23,7 @@ class Ray {
     point_at_parameter(t){
         return this.v1.add(this.v2.mul(t));
     }
+
 }
 
 export default Ray;
