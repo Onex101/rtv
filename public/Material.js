@@ -1,3 +1,6 @@
+import Ray from "./Ray.js";
+import Vector from "./Vector.js"
+
 class Material{
     constructor(){
 
@@ -24,9 +27,9 @@ class Lambertian extends Material{
     scatter(rayIn, hitRec, attenuation, rayScattered)
     {
         let target = hitRec.p.add(hitRec.n).add(random_in_unit_sphere());
-        rayScattered.overwrite(new Ray(hitRec.p, target.sub(hitRec.p)));
-        attenuation.overwrite(this.albedo);
-        return true;
+        // rayScattered.overwrite(new Ray(hitRec.p, target.sub(hitRec.p)));
+        // attenuation.overwrite(this.albedo);
+        return ({scattered: new Ray(hitRec.p, target.sub(hitRec.p)), attenuation: this.albedo, doesMat: true })
     }
 }
 
@@ -42,10 +45,11 @@ class Metal extends Material{
     }
 
     scatter (rayIn, hitRec, attenuation, rayScattered) {
-        let reflected = this.reflect(rayIn.direction().unit(), hitRec.n);
-        rayScattered.overwrite(new Ray(hitRec.p, reflected.add(random_in_unit_sphere().mul(this.fuzz))));
-        attenuation.overwrite(this.albedo);
-        return rayScattered.direction().dot(hitRec.n) > 0;
+        let reflected = this.reflect(rayIn.direction().unit_vector(), hitRec.n);
+        // rayScattered.overwrite(new Ray(hitRec.p, reflected.add(random_in_unit_sphere().mul(this.fuzz))));
+        // attenuation.overwrite(this.albedo);
+        return ({scattered: new Ray(hitRec.p, reflected.add(random_in_unit_sphere().mul(this.fuzz))), attenuation: this.albedo, doesMat: rayScattered.direction().dot(hitRec.n) > 0 })
+
     }
 
 }
@@ -66,9 +70,9 @@ class Dielectric extends Material{
         let discriminant = 1.0 - niOverNt*niOverNt*(1 - dt*dt);
         if (discriminant > 0) {
             refracted.overwrite( uv.sub(n.mul(dt)).mul(niOverNt).sub( n.mul(Math.sqrt(discriminant)) ) );
-            return true;
+            return ({scattered: uv.sub(n.mul(dt)).mul(niOverNt).sub( n.mul(Math.sqrt(discriminant)) ), doesMat: true})
         } else {
-            return false;
+            return ({doesMat: false});
         }
     }
 
@@ -82,8 +86,8 @@ class Dielectric extends Material{
         let outwardNormal = new Vector();
         let reflected = this.reflect(rayIn.direction(), hitRec.n);
         let niOverNt = 0;
-        attenuation.overwrite(new Vector(1.0, 1.0, 1.0));
-
+        let retAttenuation = (new Vector(1.0, 1.0, 1.0));
+        let retScattered;
         let refracted = new Vector();
         let reflectProb = 0;
         let cosine = 0;
@@ -93,7 +97,7 @@ class Dielectric extends Material{
             niOverNt = this.refractiveIndex;
             cosine = this.refractiveIndex * rayIn.direction().dot(hitRec.n) / rayIn.direction().length();
         } else {
-            outwardNormal.overwrite(hitRec.n);
+            outwardNormal = (hitRec.n);
             niOverNt = 1.0 / this.refractiveIndex;
             cosine = -(rayIn.direction().dot(hitRec.n)) / rayIn.direction().length();
         }
@@ -101,21 +105,23 @@ class Dielectric extends Material{
         if (this.refract(rayIn.direction(), outwardNormal, niOverNt, refracted)) {
             reflectProb = this.schlick(cosine, this.refractiveIndex);
         } else {
-            rayScattered.overwrite( new Ray(hitRec.p, reflected) );
+            retScattered = ( new Ray(hitRec.p, reflected) );
             reflectProb = 1.0;
         }
 
         if (Math.random() < reflectProb) {
-            rayScattered.overwrite( new Ray(hitRec.p, reflected) );
+            retScattered = ( new Ray(hitRec.p, reflected) );
         } else {
-            rayScattered.overwrite( new Ray(hitRec.p, refracted) );
+            retScattered = ( new Ray(hitRec.p, refracted) );
         }
-        return true;
+        return {doesMat: true, scattered: retScattered, attenuation: retAttenuation};
     }
 }
 
-export default {
+export default Material
+
+export {
     Dielectric,
     Metal,
-    Lambertian
+    Lambertian,
 }
