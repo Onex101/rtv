@@ -43,7 +43,7 @@ function main (){
                 let r = cam.get_ray(u, v);
                 col = col.add(get_colour(r, world, 0));
             }
-            col = col.div(ns).mul(255).floor();
+            col = col.div(ns).mul(255);
             setPixel(imageData.data, nx, x, ny - y, col.x, col.y, col.z);
         }
     }
@@ -61,18 +61,9 @@ function setPixel(data, width, x, y, r, g, b) {
 function get_colour(ray, world, depth){
     let rec = world.hit(ray, 0.001, Number.MAX_VALUE);
     if (rec.hit){
-        // let scattered = new Ray();
-        // let attenuation = new Vector();
-        let {scattered, attenuation, doesMat} = rec.m.scatter(ray, rec, new Vector(), new Ray())
-        if (depth < 50 && doesMat){
-            // let target = rec.p.add(rec.n).add(random_in_unit_sphere());
-            // return get_colour(new Ray(rec.p, target.sub(rec.p)), world, depth + 1).mul(0.5);
-            return attenuation.mul(get_colour(scattered, world, depth+1))
-        }
-        else{
-            return new Vector();
-        }
-        
+        let target = rec.p.add(rec.n).add(random_in_unit_sphere());
+        return get_colour(new Ray(rec.p, target.sub(rec.p)), world, depth+1).mul(0.5);
+//        return new Vector(rec.n.x + 1,rec.n.y + 1,rec.n.z + 1).mul(0.5);
     }
     else{
         let unit_direction = ray.direction().unit_vector();

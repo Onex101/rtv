@@ -11,14 +11,14 @@ class Sphere{
 		let oc = ray.origin().sub(this.center);
 		let a = ray.direction().dot(ray.direction());
 		let b = oc.dot(ray.direction());
-		let c = oc.dot(oc) - this.radius * this.radius;
+		let c = oc.dot(oc) - (this.radius * this.radius);
 		let discriminant = b*b - a*c;
 		let record = {t: 0.0, p: new Vector(0.0, 0.0, 0.0), n: new Vector(0.0, 0.0, 0.0), hit: false, m: this.material};
 		if (discriminant > 0){
 			let temp = (-b - Math.sqrt(discriminant))/a;
 			if (temp < tmax && temp > tmin){
 				record.t = temp;
-				record.p = ray.point_at_parameter(temp);
+				record.p = ray.point_at_parameter(record.t);
 				record.n = record.p.sub(this.center).div(this.radius);
 				record.m = this.material;
 				record.hit = true;
@@ -26,7 +26,7 @@ class Sphere{
 			temp = (-b + Math.sqrt(discriminant))/a;
 			if (temp < tmax && temp > tmin){
 				record.t = temp;
-				record.p = ray.point_at_parameter(temp);
+				record.p = ray.point_at_parameter(record.t);
 				record.n = record.p.sub(this.center).div(this.radius);
 				record.m = this.material;
 				record.hit = true;

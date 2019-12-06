@@ -6,7 +6,7 @@ class Vector {
     }
 
     length () {
-       return Math.sqrt(this.squared_length()); 
+       return Math.sqrt(this.dot(this)); 
     }
 
     squared_length(){
