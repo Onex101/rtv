@@ -61,9 +61,10 @@ function setPixel(data, width, x, y, r, g, b) {
 function get_colour(ray, world, depth){
     let rec = world.hit(ray, 0.001, Number.MAX_VALUE);
     if (rec.hit){
-        let scattered = new Ray();
-        let attenuation = new Vector();
-        if (depth < 50 && rec.material.scatter(ray, rec, attenuation, scattered)){
+        // let scattered = new Ray();
+        // let attenuation = new Vector();
+        let {scattered, attenuation, doesMat} = rec.m.scatter(ray, rec, new Vector(), new Ray())
+        if (depth < 50 && doesMat){
             // let target = rec.p.add(rec.n).add(random_in_unit_sphere());
             // return get_colour(new Ray(rec.p, target.sub(rec.p)), world, depth + 1).mul(0.5);
             return attenuation.mul(get_colour(scattered, world, depth+1))
