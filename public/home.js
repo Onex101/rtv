@@ -3,7 +3,7 @@ import Sphere from "./Sphere.js";
 import Hitable_List from "./Hitable.js";
 import Camera from "./Camera.js";
 import Ray from "./Ray.js";
-import { Lambertian, Metal } from "./Material.js";
+// import { Lambertian, Metal } from "./Material.js";
 
 let canvas;
 let context;
@@ -16,35 +16,44 @@ window.onload = function() {
 };
 
 function main (){
+    console.log("Raytracing...")
     const nx = canvas.width;
     const ny = canvas.height;
     const ns = ny;
     let imageData = context.getImageData(0, 0, nx, ny);
 
-    let list = [];
-    // list[0] = new Sphere(new Vector(0, 0, -1), 0.5);
-    // list[1] = new Sphere(new Vector(0, -100.5, -1), 100);
-    list[0] = new Sphere(new Vector(0,0,-1), 0.5, new Lambertian(new Vector(0.8, 0.3, 0.3)));
-    list[1] = new Sphere(new Vector(0,-100.5,-1), 100, new Lambertian(new Vector(0.8, 0.8, 0.0)));
-    list[2] = new Sphere(new Vector(1,0,-1), 0.5, new Metal(new Vector(0.8, 0.6, 0.2)));
-    list[3] = new Sphere(new Vector(-1,0,-1), 0.5, new Metal(new Vector(0.8, 0.8, 0.8)));
+    // let list = [];
+    // // list[0] = new Sphere(new Vector(0, 0, -1), 0.5);
+    // // list[1] = new Sphere(new Vector(0, -100.5, -1), 100);
+    // list[0] = new Sphere(new Vector(0,0,-1), 0.5, new Lambertian(new Vector(0.8, 0.3, 0.3)));
+    // list[1] = new Sphere(new Vector(0,-100.5,-1), 100, new Lambertian(new Vector(0.8, 0.8, 0.0)));
+    // list[2] = new Sphere(new Vector(1,0,-1), 0.5, new Metal(new Vector(0.8, 0.6, 0.2)));
+    // list[3] = new Sphere(new Vector(-1,0,-1), 0.5, new Metal(new Vector(0.8, 0.8, 0.8)));
 
-    let world = new Hitable_List(list, list.length);
-    let cam = new Camera();
+    // let world = new Hitable_List(list, list.length);
+    // let cam = new Camera();
 
-    for (let y = ny - 1; y >= 0; y--) {
-        for (let x = 0; x < nx; x++) {
+    let lower_left_corner = new Vector(-2.0, -1.0, -1.0);
+    let horizontal = new Vector(4.0, 0.0, 0.0);
+    let vertical = new Vector(0.0, 2.0, 0.0);
+    let origin = new Vector(0.0, 0.0, 0.0);
 
-            let col = new Vector();
-
-            for (let s = 0; s < ns; s++) {
-                let u = (x + get_rand_float(-1, 1)) / nx;
-                let v = (y + get_rand_float(-1, 1)) / ny;
-                let r = cam.get_ray(u, v);
-                col = col.add(get_colour(r, world, 0));
-            }
-            col = col.div(ns).mul(255).floor();
-            setPixel(imageData.data, nx, x, ny - y, col.x, col.y, col.z);
+    for (let j = ny - 1; j >= 0; j--) {
+        for (let i = 0; i < nx; i++) {
+            let u = (i*1.0) / (nx);
+            let v = (j*1.0) / (ny);
+            let ray = new Ray(origin, lower_left_corner.add(horizontal.mul(u)).add(vertical.mul(v)));
+            let col = get_colour(ray); 
+            col = col.mul(255.99)
+            // for (let s = 0; s < ns; s++) {
+            //     let u = (x + get_rand_float(-1, 1)) / nx;
+            //     let v = (y + get_rand_float(-1, 1)) / ny;
+            //     let r = cam.get_ray(u, v);
+            //     col = col.add(get_colour(r, world, 0));
+            // }
+            // col = col.div(ns).mul(255).floor();
+            // console.log(col);
+            setPixel(imageData.data, nx, i, ny - j, col.x, col.y, col.z);
         }
     }
     context.putImageData(imageData, 0, 0);
@@ -58,26 +67,51 @@ function setPixel(data, width, x, y, r, g, b) {
     data[p + 3] = 255;
 }
 
-function get_colour(ray, world, depth){
-    let rec = world.hit(ray, 0.001, Number.MAX_VALUE);
-    if (rec.hit){
-        let scattered = new Ray();
-        let attenuation = new Vector();
-        if (depth < 50 && rec.material.scatter(ray, rec, attenuation, scattered)){
-            // let target = rec.p.add(rec.n).add(random_in_unit_sphere());
-            // return get_colour(new Ray(rec.p, target.sub(rec.p)), world, depth + 1).mul(0.5);
-            return attenuation.mul(get_colour(scattered, world, depth+1))
-        }
-        else{
-            return new Vector();
-        }
+function hit_sphere(center, radius, r) {
+    let oc = r.origin().sub(center);
+    let a = r.direction().dot(r.direction());
+    let b = 2.0 * r.direction().dot(oc);
+    let c = oc.dot(oc) - (radius*radius);
+    let discriminant = b*b - 4*a*c;
+    if (discriminant < 0) {
+        return -1.0;
+    }
+    else {
+        return (-b - Math.sqrt(discriminant) ) / (2.0*a);
+    }
+}
+
+
+
+function get_colour(ray){
+    let s = new Sphere(new Vector(0, 0, -1), 0.5);
+    let t = hit_sphere(new Vector(0, 0, -1), 0.5, ray);
+    if (t > 0.0){
+        let N = new Vector().unit_vector(ray.point_at_parameter(t).sub(new Vector(0, 0, -1)));
+        return new Vector(N.x+1, N.y+1, N.z+1).mul(0.5)
+    }
+    let unit_direction = new Vector().unit_vector(ray.direction());
+    t = 0.5 * (unit_direction.y + 1.0);
+    return ((new Vector(1.0, 1.0, 1.0)).mul(1.0 - t).add((new Vector(0.5, 0.7, 1.0)).mul(t)));
+    // let rec = world.hit(ray, 0.001, Number.MAX_VALUE);
+    // if (rec.hit){
+    //     let scattered = new Ray();
+    //     let attenuation = new Vector();
+    //     if (depth < 50 && rec.material.scatter(ray, rec, attenuation, scattered)){
+    //         // let target = rec.p.add(rec.n).add(random_in_unit_sphere());
+    //         // return get_colour(new Ray(rec.p, target.sub(rec.p)), world, depth + 1).mul(0.5);
+    //         return attenuation.mul(get_colour(scattered, world, depth+1))
+    //     }
+    //     else{
+    //         return new Vector();
+    //     }
         
-    }
-    else{
-        let unit_direction = ray.direction().unit_vector();
-        let t = 0.5 * (unit_direction.y + 1.0);
-        return ((new Vector(1.0, 1.0, 1.0)).mul(1.0 - t).add((new Vector(0.5, 0.7, 1.0)).mul(t)));
-    }
+    // }
+    // else{
+    //     let unit_direction = ray.direction().unit_vector();
+    //     let t = 0.5 * (unit_direction.y + 1.0);
+    //     return ((new Vector(1.0, 1.0, 1.0)).mul(1.0 - t).add((new Vector(0.5, 0.7, 1.0)).mul(t)));
+    // }
 }
 
 function random_in_unit_sphere() {
