@@ -29,6 +29,7 @@ class Hitable_List {
 				rec.t = record.t;
 				rec.p = record.p;
 				rec.n = record.n;
+				rec.m = record.m;
 				// console.log({N_in_Hitable: record.n})
 				rec.hit = record.hit;
 			}

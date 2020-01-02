@@ -9,8 +9,13 @@ class Sphere{
 	}
 
 	is_hit(ray, tmin, tmax){
-		
-		let oc = ray.origin().sub(this.center);
+		let oc;
+		try{
+			oc = ray.origin().sub(this.center);
+		}
+		catch (e){
+			console.log({ray, tmin, tmax})
+		}
 		let a = ray.direction().dot(ray.direction());
 		let b = 2.0 * ray.direction().dot(oc);
 		let c = oc.dot(oc) - (this.radius*this.radius);
