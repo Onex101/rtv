@@ -31,7 +31,7 @@ function main (){
     // list[3] = new Sphere(new Vector(-1,0,-1), 0.5, new Metal(new Vector(0.8, 0.8, 0.8)));
 
     let world = new Hitable_List(list, list.length);
-    // let cam = new Camera();
+    let cam = new Camera();
 
     let lower_left_corner = new Vector(-2.0, -1.0, -1.0);
     let horizontal = new Vector(4.0, 0.0, 0.0);
@@ -42,17 +42,14 @@ function main (){
         for (let i = 0; i < nx; i++) {
             let u = (i*1.0) / (nx);
             let v = (j*1.0) / (ny);
-            let ray = new Ray(origin, lower_left_corner.add(horizontal.mul(u)).add(vertical.mul(v)));
-            let col = get_colour(ray, world); 
-            col = col.mul(255.99)
-            // for (let s = 0; s < ns; s++) {
-            //     let u = (x + get_rand_float(-1, 1)) / nx;
-            //     let v = (y + get_rand_float(-1, 1)) / ny;
-            //     let r = cam.get_ray(u, v);
-            //     col = col.add(get_colour(r, world, 0));
-            // }
-            // col = col.div(ns).mul(255).floor();
-            // console.log(col);
+            let col = new Vector();
+            for (let s = 0; s < ns; s++) {
+                let u = (i + get_rand_float(-1, 1)) / nx;
+                let v = (j + get_rand_float(-1, 1)) / ny;
+                let r = cam.get_ray(u, v);
+                col = col.add(get_colour(r, world));
+            }
+            col = col.div(ns).mul(255);
             setPixel(imageData.data, nx, i, ny - j, col.x, col.y, col.z);
         }
     }
@@ -70,7 +67,8 @@ function setPixel(data, width, x, y, r, g, b) {
 function get_colour(ray, world){
     let rec = world.hit(ray, 0.001, Number.MAX_VALUE);
     if (rec.hit){
-        return new Vector(rec.n.x+1, rec.n.y+1, rec.n.z+1).mul(0.5)
+        let target = rec.p.add(rec.n).add(random_in_unit_sphere());
+        return get_colour(new Ray(rec.p, target.sub(rec.p)), world).mul(0.5);
     }
     else{
         let unit_direction = new Vector().unit_vector(ray.direction());
@@ -80,7 +78,7 @@ function get_colour(ray, world){
     //     let scattered = new Ray();
     //     let attenuation = new Vector();
     //     if (depth < 50 && rec.material.scatter(ray, rec, attenuation, scattered)){
-    //         // let target = rec.p.add(rec.n).add(random_in_unit_sphere());
+            // let target = rec.p.add(rec.n).add(random_in_unit_sphere());
     //         // return get_colour(new Ray(rec.p, target.sub(rec.p)), world, depth + 1).mul(0.5);
     //         return attenuation.mul(get_colour(scattered, world, depth+1))
     //     }
