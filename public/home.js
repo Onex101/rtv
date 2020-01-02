@@ -22,15 +22,15 @@ function main (){
     const ns = ny;
     let imageData = context.getImageData(0, 0, nx, ny);
 
-    // let list = [];
-    // // list[0] = new Sphere(new Vector(0, 0, -1), 0.5);
-    // // list[1] = new Sphere(new Vector(0, -100.5, -1), 100);
+    let list = [];
+    list[0] = new Sphere(new Vector(0, 0, -1), 0.5);
+    // list[1] = new Sphere(new Vector(0, -100.5, -1), 100);
     // list[0] = new Sphere(new Vector(0,0,-1), 0.5, new Lambertian(new Vector(0.8, 0.3, 0.3)));
     // list[1] = new Sphere(new Vector(0,-100.5,-1), 100, new Lambertian(new Vector(0.8, 0.8, 0.0)));
     // list[2] = new Sphere(new Vector(1,0,-1), 0.5, new Metal(new Vector(0.8, 0.6, 0.2)));
     // list[3] = new Sphere(new Vector(-1,0,-1), 0.5, new Metal(new Vector(0.8, 0.8, 0.8)));
 
-    // let world = new Hitable_List(list, list.length);
+    let world = new Hitable_List(list, list.length);
     // let cam = new Camera();
 
     let lower_left_corner = new Vector(-2.0, -1.0, -1.0);
@@ -43,7 +43,7 @@ function main (){
             let u = (i*1.0) / (nx);
             let v = (j*1.0) / (ny);
             let ray = new Ray(origin, lower_left_corner.add(horizontal.mul(u)).add(vertical.mul(v)));
-            let col = get_colour(ray); 
+            let col = get_colour(ray, world); 
             col = col.mul(255.99)
             // for (let s = 0; s < ns; s++) {
             //     let u = (x + get_rand_float(-1, 1)) / nx;
@@ -83,18 +83,29 @@ function hit_sphere(center, radius, r) {
 
 
 
-function get_colour(ray){
+function get_colour(ray, world){
     let s = new Sphere(new Vector(0, 0, -1), 0.5);
     let t = hit_sphere(new Vector(0, 0, -1), 0.5, ray);
     if (t > 0.0){
+        console.log({t})
         let N = new Vector().unit_vector(ray.point_at_parameter(t).sub(new Vector(0, 0, -1)));
-        return new Vector(N.x+1, N.y+1, N.z+1).mul(0.5)
+        console.log({Old: new Vector(N.x+1, N.y+1, N.z+1).mul(0.5)})
+        console.log({Old_Normal: N})
     }
-    let unit_direction = new Vector().unit_vector(ray.direction());
-    t = 0.5 * (unit_direction.y + 1.0);
-    return ((new Vector(1.0, 1.0, 1.0)).mul(1.0 - t).add((new Vector(0.5, 0.7, 1.0)).mul(t)));
-    // let rec = world.hit(ray, 0.001, Number.MAX_VALUE);
-    // if (rec.hit){
+    // let unit_direction = new Vector().unit_vector(ray.direction());
+    // t = 0.5 * (unit_direction.y + 1.0);
+    // return ((new Vector(1.0, 1.0, 1.0)).mul(1.0 - t).add((new Vector(0.5, 0.7, 1.0)).mul(t)));
+    let rec = world.hit(ray, 0.001, Number.MAX_VALUE);
+    if (rec.hit){
+        console.log({New: new Vector(rec.n.x+1, rec.n.y+1, rec.n.z+1).mul(0.5)})
+        console.log({New_Normal: rec.n})
+        return new Vector(rec.n.x+1, rec.n.y+1, rec.n.z+1).mul(0.5)
+    }
+    else{
+        let unit_direction = new Vector().unit_vector(ray.direction());
+        let t = 0.5 * (unit_direction.y + 1.0);
+        return ((new Vector(1.0, 1.0, 1.0)).mul(1.0 - t).add((new Vector(0.5, 0.7, 1.0)).mul(t)));
+    }
     //     let scattered = new Ray();
     //     let attenuation = new Vector();
     //     if (depth < 50 && rec.material.scatter(ray, rec, attenuation, scattered)){

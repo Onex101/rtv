@@ -23,15 +23,15 @@ class Hitable_List {
 		let closest = tmax;
 		let rec = {t: 0.0, p: new Vector(0.0, 0.0, 0.0), n: new Vector(0.0, 0.0, 0.0), hit: false};
 		for (var i = 0; i < this.size; i++){
-			let tmp_hit = this.list[i].is_hit(ray, tmin, closest);
-			if (tmp_hit.hit){
-				closest = tmp_hit.t;
-				rec.t = tmp_hit.t;
-				rec.p = tmp_hit.p;
-				rec.n = tmp_hit.n;
-				rec.hit = tmp_hit.hit;
+			let record = this.list[i].is_hit(ray, tmin, closest);
+			if (record.hit){
+				closest = record.t;
+				rec.t = record.t;
+				rec.p = record.p;
+				rec.n = record.n;
+				// console.log({N_in_Hitable: record.n})
+				rec.hit = record.hit;
 			}
-			
 		}
 		return (rec)
 	}
