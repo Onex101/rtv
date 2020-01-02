@@ -26,7 +26,10 @@ class Hitable_List {
 			let tmp_hit = this.list[i].is_hit(ray, tmin, closest);
 			if (tmp_hit.hit){
 				closest = tmp_hit.t;
-				rec = tmp_hit;
+				rec.t = tmp_hit.t;
+				rec.p = tmp_hit.p;
+				rec.n = tmp_hit.n;
+				rec.hit = tmp_hit.hit;
 			}
 			
 		}

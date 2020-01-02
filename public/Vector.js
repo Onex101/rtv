@@ -57,8 +57,8 @@ class Vector {
         );
     }
 
-    unit_vector(){
-        return this.div(this.length());
+    unit_vector(v){
+        return v.div(v.length())
     }
 
     make_unit_vector() {

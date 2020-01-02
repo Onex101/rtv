@@ -10,11 +10,7 @@ class Camera {
     }
 
     get_ray(u, v) {
-        return new Ray(this.origin, 
-                       this.lower_left_corner.add(
-                       this.horizontal.mul(u)).add(
-                       this.vertical.mul(v)).sub(
-                       this.origin));
+        return new Ray(this.origin, this.lower_left_corner.add(this.horizontal.mul(u)).add(this.vertical.mul(v)).sub(this.origin));
 
     }
 }
