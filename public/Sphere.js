@@ -18,15 +18,23 @@ class Sphere{
 		let record = {t: 0.0, p: new Vector(0.0, 0.0, 0.0), n: new Vector(0.0, 0.0, 0.0), hit: false, m: this.material};
 		if (discriminant > 0){
 			// console.log({oc, a, b, c, discriminant})
-			let temp1 = (-b - Math.sqrt(discriminant) ) / (2.0*a);
-			let temp2 = (-b + Math.sqrt(discriminant) ) / (2.0*a);
-			let temp3 = temp1 < temp2 ? temp1 : temp2;
-			if (temp3 < tmax && temp3 > tmin){
-				record.t = temp3;
-				record.p = ray.point_at_parameter(temp3);
+			let temp = (-b - Math.sqrt(discriminant) ) / (2.0*a);
+			if (temp < tmax && temp > tmin){
+				record.t = temp;
+				record.p = ray.point_at_parameter(temp);
 				record.n = new Vector().unit_vector(record.p.sub(this.center));
 				record.m = this.material;
 				record.hit = true;
+				return record;
+			}
+			temp = (-b + Math.sqrt(discriminant) ) / (2.0*a);
+			if (temp < tmax && temp > tmin){
+				record.t = temp;
+				record.p = ray.point_at_parameter(temp);
+				record.n = new Vector().unit_vector(record.p.sub(this.center));
+				record.m = this.material;
+				record.hit = true;
+				return record;
 			}
 		}
 		return record;
