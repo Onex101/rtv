@@ -24,7 +24,7 @@ function main (){
 
     let list = [];
     list[0] = new Sphere(new Vector(0, 0, -1), 0.5);
-    // list[1] = new Sphere(new Vector(0, -100.5, -1), 100);
+    list[1] = new Sphere(new Vector(0, -100.5, -1), 100);
     // list[0] = new Sphere(new Vector(0,0,-1), 0.5, new Lambertian(new Vector(0.8, 0.3, 0.3)));
     // list[1] = new Sphere(new Vector(0,-100.5,-1), 100, new Lambertian(new Vector(0.8, 0.8, 0.0)));
     // list[2] = new Sphere(new Vector(1,0,-1), 0.5, new Metal(new Vector(0.8, 0.6, 0.2)));
@@ -67,38 +67,9 @@ function setPixel(data, width, x, y, r, g, b) {
     data[p + 3] = 255;
 }
 
-function hit_sphere(center, radius, r) {
-    let oc = r.origin().sub(center);
-    let a = r.direction().dot(r.direction());
-    let b = 2.0 * r.direction().dot(oc);
-    let c = oc.dot(oc) - (radius*radius);
-    let discriminant = b*b - 4*a*c;
-    if (discriminant < 0) {
-        return -1.0;
-    }
-    else {
-        return (-b - Math.sqrt(discriminant) ) / (2.0*a);
-    }
-}
-
-
-
 function get_colour(ray, world){
-    let s = new Sphere(new Vector(0, 0, -1), 0.5);
-    let t = hit_sphere(new Vector(0, 0, -1), 0.5, ray);
-    if (t > 0.0){
-        console.log({t})
-        let N = new Vector().unit_vector(ray.point_at_parameter(t).sub(new Vector(0, 0, -1)));
-        console.log({Old: new Vector(N.x+1, N.y+1, N.z+1).mul(0.5)})
-        console.log({Old_Normal: N})
-    }
-    // let unit_direction = new Vector().unit_vector(ray.direction());
-    // t = 0.5 * (unit_direction.y + 1.0);
-    // return ((new Vector(1.0, 1.0, 1.0)).mul(1.0 - t).add((new Vector(0.5, 0.7, 1.0)).mul(t)));
     let rec = world.hit(ray, 0.001, Number.MAX_VALUE);
     if (rec.hit){
-        console.log({New: new Vector(rec.n.x+1, rec.n.y+1, rec.n.z+1).mul(0.5)})
-        console.log({New_Normal: rec.n})
         return new Vector(rec.n.x+1, rec.n.y+1, rec.n.z+1).mul(0.5)
     }
     else{
