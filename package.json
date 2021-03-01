@@ -18,7 +18,7 @@
   "homepage": "https://github.com/Onex101/rtv#readme",
   "dependencies": {
     "express": "^4.17.1",
-    "three": "^0.110.0"
+    "three": "^0.125.0"
   },
   "devDependencies": {
     "nodemon": "^2.0.1"
